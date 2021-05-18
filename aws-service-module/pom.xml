@@ -10,13 +10,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>aws-service-module</artifactId>
+    <packaging>jar</packaging>
+
     <dependencies>
         <dependency>
             <groupId>com.me</groupId>
             <artifactId>aws-repository-module</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>package</scope>
         </dependency>
     </dependencies>
-
 
 </project>
