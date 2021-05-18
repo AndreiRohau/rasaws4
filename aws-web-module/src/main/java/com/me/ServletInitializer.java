@@ -1,4 +1,4 @@
-package com.epam;
+package com.me;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
