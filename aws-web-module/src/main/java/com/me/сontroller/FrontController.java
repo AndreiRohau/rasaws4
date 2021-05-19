@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Calendar;
 import java.util.logging.Logger;
 
+import static com.me.security.CredentialsStateHolder.AWS_ACCESS_KEY_ID;
+import static com.me.security.CredentialsStateHolder.AWS_SECRET_KEY;
+
 @RestController
 public class FrontController {
     private static Logger log = Logger.getLogger(FrontController.class.getName());
@@ -25,7 +28,7 @@ public class FrontController {
     @GetMapping("/status")
     public ResponseEntity<String> status() {
         log.info("FrontController#status()");
-        return ResponseEntity.ok("Success!");
+        return ResponseEntity.ok("Success! <br/> Arguments=[" + AWS_ACCESS_KEY_ID.getValue() + ", " + AWS_SECRET_KEY.getValue() + "]");
     }
 
     @GetMapping("/check-zone")
