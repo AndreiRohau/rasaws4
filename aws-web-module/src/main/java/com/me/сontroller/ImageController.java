@@ -17,7 +17,7 @@ public class ImageController {
     @Autowired
     private ImageService imageService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<Image>> getImages() {
         log.info("ImageController#getImages()");
         final List<Image> images = imageService.getImages();
@@ -33,7 +33,7 @@ public class ImageController {
                 .body(imageById);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<Image> saveImage(Image image) {
         log.info("ImageController#saveImage(), params=[" + image + "]");
         final Image savedImage = imageService.saveImage(image);
@@ -41,7 +41,7 @@ public class ImageController {
                 .body(savedImage);
     }
 
-    @PutMapping("/")
+    @PutMapping
     public ResponseEntity<Image> updateImage(Image image) {
         log.info("ImageController#updateImage(), params=[" + image + "]");
         final Image updatedImage = imageService.updateImage(image);

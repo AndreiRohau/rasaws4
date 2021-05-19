@@ -16,7 +16,9 @@ public enum CredentialsStateHolder {
     }
 
     public static void setUp(final String[] args) {
-        CredentialsStateHolder.AWS_ACCESS_KEY_ID.setValue(args[0]);
-        CredentialsStateHolder.AWS_SECRET_KEY.setValue(args[1]);
+        if (args.length == 2) {
+            CredentialsStateHolder.AWS_ACCESS_KEY_ID.setValue(args[0]);
+            CredentialsStateHolder.AWS_SECRET_KEY.setValue(args[1]);
+        }
     }
 }
