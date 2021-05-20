@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Calendar;
 import java.util.logging.Logger;
 
-import static com.me.security.CredentialsStateHolder.AWS_ACCESS_KEY_ID;
-import static com.me.security.CredentialsStateHolder.AWS_SECRET_KEY;
+import static com.me.aws.CredentialsStateHolder.AWS_ACCESS_KEY_ID;
+import static com.me.aws.CredentialsStateHolder.AWS_SECRET_KEY;
 
 @RestController
 public class FrontController {

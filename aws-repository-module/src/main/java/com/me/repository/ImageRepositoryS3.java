@@ -1,13 +1,9 @@
-package com.me.service;
+package com.me.repository;
 
 import com.me.domain.Image;
 
-import java.util.List;
-
-public interface ImageService {
+public interface ImageRepositoryS3 {
     Image downloadImageByName(String fullName);
-    List<Image> getMetadataImages();
     Image uploadImage(Image image);
     void deleteImageByName(String fullName);
-    Image getRandomMetadataImage();
 }

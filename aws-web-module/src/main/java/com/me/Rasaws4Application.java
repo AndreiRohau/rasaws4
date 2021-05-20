@@ -1,6 +1,6 @@
 package com.me;
 
-import com.me.security.CredentialsStateHolder;
+import com.me.aws.CredentialsStateHolder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

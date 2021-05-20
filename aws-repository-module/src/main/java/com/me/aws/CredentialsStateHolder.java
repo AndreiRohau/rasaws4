@@ -1,6 +1,7 @@
-package com.me.security;
+package com.me.aws;
 
 import lombok.Getter;
+
 @Getter
 public enum CredentialsStateHolder {
     AWS_ACCESS_KEY_ID(""), AWS_SECRET_KEY("");
@@ -16,9 +17,11 @@ public enum CredentialsStateHolder {
     }
 
     public static void setUp(final String[] args) {
-        if (args.length == 2) {
+        if (args.length > 1) {
             CredentialsStateHolder.AWS_ACCESS_KEY_ID.setValue(args[0]);
             CredentialsStateHolder.AWS_SECRET_KEY.setValue(args[1]);
+        } else {
+            throw new RuntimeException("Inappropriate amount of arguments.");
         }
     }
 }
