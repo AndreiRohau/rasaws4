@@ -1,0 +1,162 @@
+# --------------------------------------------------------------------------------------------------
+# CloudFormation Network Layer: VPC, Subnets + RouteTables, Internet
+# Author: Andrei Rohau
+#
+# Version      Date           Name                Info
+# 1.0          12-05-2021    Andrei Rohau       Initial Version
+#
+# --------------------------------------------------------------------------------------------------
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Network: VPC, Subnets + RouteTables, Internet"
+
+Metadata:
+ AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Network Configuration"
+        Parameters: 
+          - Environment
+          - VPCCidrBlock
+          - MyOwnPostfix
+      - 
+        Label: 
+          default: "Availability Zones"
+        Parameters: 
+          - 1stAZ   
+          - 2ndAZ
+      -
+        Label:
+          default: "Subnets CIDR Blocks"
+        Parameters:
+          - MyOwnCidrSnPrivate1a
+          - MyOwnCidrSnPrivate1b
+
+Parameters:
+  Environment:
+    Type: String
+    Default: "DEV"
+
+  VPCCidrBlock:
+    Type: String
+    Default: '10.0.0.0/22'
+
+  1stAZ:
+    Type: String
+    Default: 'us-east-1a'
+
+  2ndAZ:
+    Type: String
+    Default: 'us-east-1b'
+
+  MyOwnCidrSnPrivate1a: 
+    Type: String
+    Default: '10.0.0.0/24'
+    Description: "Private Subnet-A CIDR"
+
+  MyOwnCidrSnPrivate1b: 
+    Type: String
+    Default: '10.0.1.0/24'
+    Description: "Private Subnet-A CIDR"
+
+  MyOwnPostfix:
+    Type: String
+    Default: ''   
+
+Resources:
+#====== VPC ======
+  MyOwnVPC:
+    Type: AWS::EC2::VPC
+    Properties:                              # Attach Primary CIDR Block
+      CidrBlock: !Ref VPCCidrBlock             
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnVPC", !Ref MyOwnPostfix ] ]
+          
+#====== Internet Gateway ======
+  MyOwnIGW:
+    Type: "AWS::EC2::InternetGateway"
+    Properties: 
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnIGW", !Ref MyOwnPostfix ] ]
+
+  GatewayAttachmentInternet:                       # Attachment IGW to VPC
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties:
+      VpcId:  !Ref MyOwnVPC
+      InternetGatewayId: !Ref MyOwnIGW
+
+#====== All Subnets ======
+  MyOwnSnPrivate1a:
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      VpcId: !Ref MyOwnVPC
+      AvailabilityZone: !Ref 1stAZ
+      CidrBlock: !Ref MyOwnCidrSnPrivate1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnSnPrivate1a", !Ref MyOwnPostfix ] ]
+          
+  MyOwnSnPrivate1b:
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      VpcId: !Ref MyOwnVPC
+      AvailabilityZone: !Ref 2ndAZ
+      CidrBlock: !Ref MyOwnCidrSnPrivate1b
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnSnPrivate1b", !Ref MyOwnPostfix ] ]
+ 
+#====== Private RouteTables ======
+  MyOwnRtPrivate:                                 # Creation of Empty Route Table
+    Type: "AWS::EC2::RouteTable"                    
+    Properties:
+      VpcId: !Ref MyOwnVPC
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnRtPrivate", !Ref MyOwnPostfix ] ]
+
+  MyOwnRtPrivateRoutesToMyOwnIGW:                        # Creation and Attachment of Routes for Route Table
+    Type: "AWS::EC2::Route" 
+    DependsOn: GatewayAttachmentInternet
+    Properties: 
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref MyOwnIGW
+      RouteTableId: !Ref MyOwnRtPrivate
+    
+#====== Associate Private Route for Private Subnets ======
+  MyOwnRtPrivateAssociateToMyOwnSnPrivate1a:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref MyOwnRtPrivate
+      SubnetId: !Ref MyOwnSnPrivate1a
+  MyOwnRtPrivateAssociateToMyOwnSnPrivate1b:
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
+    Properties:
+      RouteTableId: !Ref MyOwnRtPrivate
+      SubnetId: !Ref MyOwnSnPrivate1b
+        
+#====== OUTPUTS ======
+Outputs:
+  MyOwnVPC:
+    Description: ID for the MyOwnVPC
+    Value: !Ref MyOwnVPC
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MyOwnVPC", !Ref MyOwnPostfix ] ]
+
+  MyOwnSnPrivate1a:
+    Description: ID for Public Subnet A 
+    Value: !Ref MyOwnSnPrivate1a
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MyOwnSnPrivate1a", !Ref MyOwnPostfix ] ]
+
+  MyOwnSnPrivate1b:
+    Description: ID for Public Subnet A 
+    Value: !Ref MyOwnSnPrivate1b
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MyOwnSnPrivate1b", !Ref MyOwnPostfix ] ]
