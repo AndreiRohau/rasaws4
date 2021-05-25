@@ -19,13 +19,13 @@ public class UserController {
 
     @GetMapping("/{userId}/subscribe-email")
     public void subscribeEmail(@PathVariable String userId, @RequestParam String email) {
-        log.info("ImageController#subscribeEmail(), path=[" + userId + "], attributes=[" + email + "]");
+        log.info("UserController#subscribeEmail(), path=[" + userId + "], attributes=[" + email + "]");
         notificationService.subscribeEmail(userId, email);
     }
 
     @GetMapping("/{userId}/unsubscribe-email")
     public void unsubscribeEmail(@PathVariable String userId, @RequestParam String email) {
-        log.info("ImageController#unsubscribeEmail(), path=[" + userId + "], attributes=[" + email + "]");
+        log.info("UserController#unsubscribeEmail(), path=[" + userId + "], attributes=[" + email + "]");
         notificationService.unsubscribeEmail(userId, email);
     }
 }

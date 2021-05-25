@@ -61,12 +61,14 @@ public class NotificationServiceImpl implements NotificationService {
     public void unsubscribeEmail(String userId, final String email) {
         try {
             log.info("NotificationServiceImpl#unsubscribeEmail()");
-            final ListSubscriptionsRequest request = ListSubscriptionsRequest.builder().build();
-            final List<Subscription> subscriptions = snsClient.listSubscriptions(request).subscriptions();
+            final ListSubscriptionsByTopicRequest request = ListSubscriptionsByTopicRequest.builder()
+                    .topicArn(AWS_SNS_TOPIC_ARN.getValue())
+                    .build();
+            final List<Subscription> subscriptions = snsClient.listSubscriptionsByTopic(request).subscriptions();
             log.info(subscriptions.size() + " of " + subscriptions);
+
             final Subscription subscription = subscriptions.stream()
-                    .filter(s -> s.endpoint().equals(email)
-                            && s.topicArn().equals(AWS_SNS_TOPIC_ARN.getValue()))
+                    .filter(s -> s.endpoint().equals(email))
                     .findFirst()
                     .get();
             final UnsubscribeRequest unsubscribeRequest = UnsubscribeRequest.builder()
