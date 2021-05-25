@@ -109,6 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
         log.info("NotificationServiceImpl#sendNotifications()");
         final String sqsUrl = getSqsUrl();
         final List<Message> sqsMessages = receiveSqsMessages(sqsUrl);
+        log.info("NotificationServiceImpl#sendNotifications(), messages=[" + sqsMessages + "]");
         final List<String> messageTexts = sqsMessages.stream().map(Message::body).collect(toList());
         publishSnsTopic(messageTexts);
         deleteProcessedSqsMessages(sqsMessages, sqsUrl);

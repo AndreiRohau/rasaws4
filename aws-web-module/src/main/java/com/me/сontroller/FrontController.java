@@ -41,7 +41,9 @@ public class FrontController {
                         "Click to view image random-metadata:<br/>" +
                         "<a href=\"/images/random-metadata\">/Random image</a><br/><br/>" +
                         "Click to schedule notifications:<br/>" +
-                        "<a href=\"/run-scheduled-notification\">/Begin scheduled notifications</a><br/><br/>");
+                        "<a href=\"/run-scheduled-notification\">/Begin scheduled notifications</a><br/><br/>" +
+                        "Click to publish notifications:<br/>" +
+                        "<a href=\"/run-publish-notification\">/Publish notifications</a><br/><br/>");
     }
 
     @GetMapping("/run-scheduled-notification")
@@ -51,6 +53,17 @@ public class FrontController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Notifications scheduled!<br/><br/> " +
+                        "Click to go back home:<br/>" +
+                        "<a href=\"/\">/Back home</a><br/><br/>");
+    }
+
+    @GetMapping("/run-publish-notification")
+    public ResponseEntity<String> runPublishNotification() {
+        log.info("FrontController#runPublishNotification()");
+        scheduledService.prepareNotificationTask().run();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Notifications published!<br/><br/> " +
                         "Click to go back home:<br/>" +
                         "<a href=\"/\">/Back home</a><br/><br/>");
     }
