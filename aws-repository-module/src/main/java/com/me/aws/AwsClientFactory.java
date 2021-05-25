@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.SdkClient;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,5 +35,12 @@ public class AwsClientFactory {
         clients.put(S3, awsS3Provider.getS3client());
         clients.put(SNS, awsSnsProvider.getSnsClient());
         clients.put(SQS, awsSqsProvider.getSqsClient());
+    }
+
+    @PreDestroy
+    private void tearDown() {
+        for (AwsClientNameEnum clientName: clients.keySet()) {
+            clients.get(clientName).close();
+        }
     }
 }

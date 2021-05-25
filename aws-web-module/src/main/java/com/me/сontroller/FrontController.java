@@ -49,7 +49,7 @@ public class FrontController {
     @GetMapping("/run-scheduled-notification")
     public ResponseEntity<String> runScheduledNotification() {
         log.info("FrontController#runScheduledNotification()");
-        scheduledService.runScheduledTask(scheduledService.prepareNotificationTask(), 1, 15, TimeUnit.MINUTES);
+        scheduledService.runScheduledTask(scheduledService.prepareNotificationTask(), 10, 20, TimeUnit.SECONDS);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Notifications scheduled!<br/><br/> " +

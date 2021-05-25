@@ -129,6 +129,7 @@ public class NotificationServiceImpl implements NotificationService {
             final ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
                     .queueUrl(sqsUrl)
                     .maxNumberOfMessages(10)
+                    .waitTimeSeconds(20)
                     .build();
             return sqsClient.receiveMessage(receiveMessageRequest).messages();
         } catch (SqsException e) {

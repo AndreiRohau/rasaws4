@@ -1,7 +1,5 @@
 package com.me.util;
 
-import com.me.Rasaws4Application;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
