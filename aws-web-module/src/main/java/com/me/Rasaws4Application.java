@@ -15,7 +15,9 @@ public class Rasaws4Application {
 	/**
 	 * Passing AWS credentials
 	 * 1 arg = aws.accessKeyId
-	 * 2arg = aws.secretKey
+	 * 2 arg = aws.secretKey
+	 * 3 arg = aws.sns.topic.arn
+	 * 4 arg = aws.sqs.queue.name
 	 * Example:
 	 * java -jar aws-web-module-1.0-SNAPSHOT.jar _accessKeyId_ _secretKey_
 	 * where arg1="_accessKeyId_"; arg2="_secretKey_"
@@ -30,9 +32,9 @@ public class Rasaws4Application {
 		if (isNull(args)) {
 			log.warning("You have not provided any arguments!");
 		} else {
-			log.info("There are " + args.length + " argument(s)!");
-			for(int i = 0; i < args.length; i++) {
-				log.info("Argument(" + (i + 1) + "):" + args[i]);
+			log.info("There are " + args.length + " argument(s):");
+			for (String arg: args) {
+				log.info(arg);
 			}
 			CredentialsStateHolder.setUp(args);
 		}

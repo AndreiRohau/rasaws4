@@ -1,0 +1,97 @@
+# --------------------------------------------------------------------------------------------------
+# CloudFormation Network Layer: VPC, Subnets + RouteTables, Internet
+# Author: Andrei Rohau
+#
+# Version      Date           Name                Info
+# 1.0          12-05-2021    Andrei Rohau       Initial Version
+#
+# --------------------------------------------------------------------------------------------------
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Security Groups"
+
+Metadata:
+ AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Network Configuration (My Ip 37.214.58.98/32)"
+        Parameters: 
+          - Environment
+          - PassedVPC
+          - MyPassedSpecialIpAddress # 0.0.0.0/0
+          - MyOwnPostfix
+
+Parameters:
+  Environment:
+    Type: String
+    Default: "DEV"
+
+  PassedVPC:
+    Type: String
+    Default: '' # AWS default VPC
+
+  MyPassedSpecialIpAddress:
+    Type: String
+    Default: '0.0.0.0/0'
+
+  MyOwnPostfix:
+    Type: String
+    Default: ''
+
+Resources:        
+#====== Security Groups ======
+          
+  MyOwnSgPub:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: MyOwnSgPub
+      VpcId: !Ref PassedVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: !Ref MyPassedSpecialIpAddress
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: !Ref MyPassedSpecialIpAddress
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref MyPassedSpecialIpAddress
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnSgPub", !Ref MyOwnPostfix ] ]
+
+  MyOwnSgDb:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: MyOwnSgDb
+      VpcId: !Ref PassedVPC
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnSgDb", !Ref MyOwnPostfix ] ]
+           
+  MyOwnSgDbIngress:
+   Type: 'AWS::EC2::SecurityGroupIngress'
+   Properties:
+      GroupId: !Ref MyOwnSgDb
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !GetAtt MyOwnSgDb.GroupId
+        
+#====== OUTPUTS ======
+Outputs:
+      
+  MyOwnSgPub:
+    Description: ID for the MyOwnSgPub
+    Value: !Ref MyOwnSgPub
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MyOwnSgPub", !Ref MyOwnPostfix ] ]
+
+  MyOwnSgDb:
+    Description: ID for the MyOwnSgDb
+    Value: !Ref MyOwnSgDb
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MyOwnSgDb", !Ref MyOwnPostfix ] ]

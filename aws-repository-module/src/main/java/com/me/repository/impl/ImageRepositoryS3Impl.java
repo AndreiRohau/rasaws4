@@ -1,6 +1,6 @@
 package com.me.repository.impl;
 
-import com.me.aws.AwsS3Connector;
+import com.me.aws.AwsClientFactory;
 import com.me.domain.Image;
 import com.me.repository.ImageRepositoryS3;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.util.logging.Logger;
 
+import static com.me.aws.AwsClientNameEnum.S3;
+
 @Repository
 public class ImageRepositoryS3Impl implements ImageRepositoryS3 {
     private static Logger log = Logger.getLogger(ImageRepositoryS3Impl.class.getName());
@@ -25,8 +27,8 @@ public class ImageRepositoryS3Impl implements ImageRepositoryS3 {
     private final S3Client s3Client;
 
     @Autowired
-    public ImageRepositoryS3Impl(AwsS3Connector awsS3Connector) {
-        this.s3Client = awsS3Connector.getS3client();
+    public ImageRepositoryS3Impl(AwsClientFactory awsClientFactory) {
+        this.s3Client = (S3Client) awsClientFactory.getClients().get(S3);
     }
 
     @Override

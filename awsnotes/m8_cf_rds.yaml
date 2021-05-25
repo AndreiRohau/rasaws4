@@ -1,0 +1,90 @@
+# --------------------------------------------------------------------------------------------------
+# CloudFormation Network Layer: VPC, Subnets + RouteTables, Internet
+# Author: Andrei Rohau
+#
+# Version      Date           Name                Info
+# 1.0          12-05-2021    Andrei Rohau       Initial Version
+#
+# --------------------------------------------------------------------------------------------------
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Network: VPC, Subnets + RouteTables, Internet"
+
+Metadata:
+ AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Network Configuration (My Ip 37.214.27.94/32)"
+        Parameters: 
+          - Environment
+          - DBTitle
+          - MyOwnSgDb
+          - PublicAccessibility
+          - MyOwnPostfix
+      - 
+        Label: 
+          default: "Availability Zones"
+        Parameters: 
+          - AvailabilityZone
+
+Parameters:
+  Environment:
+    Type: String
+    Default: "DEV"
+
+  DBTitle:
+    Type: String
+    Default: "m8rdsarv81"
+
+  MyOwnSgDb:
+    Type: String
+    Default: '' # My default security group 3306
+
+  PublicAccessibility:
+    Type: boolean
+    Default: false
+
+  MyOwnPostfix:
+    Type: String
+    Default: 'v'
+
+  AvailabilityZone:
+    Type: String
+    Default: 'us-east-1a'
+
+Resources:
+
+#====== RDS ======
+  MyOwnDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: mysql
+      EngineVersion: 8.0.20
+      DBInstanceIdentifier: !Ref DBTitle
+      MasterUsername: admin
+      MasterUserPassword: qwer1234
+      DBInstanceClass: db.t2.micro
+      StorageType: gp2
+      AllocatedStorage: '5'
+      DBSecurityGroups:
+      - Ref: MyOwnSgDb
+      AvailabilityZone: !Ref AvailabilityZone
+      PubliclyAccessible: !Ref PublicAccessibility
+      DBName: !Ref DBTitle
+      DBParameterGroupName: default.mysql8.0
+      OptionGroupName: default.mysql8.0
+      BackupRetentionPeriod: 0
+      AutoMinorVersionUpgrade: true
+      DeletionPolicy: Snapshot
+      Tags:
+      - Key: "Name"
+        Value: !Join [ "-", [ !Ref Environment, "MyOwnEC2", !Ref MyOwnPostfix ] ]
+
+#====== OUTPUTS ======
+Outputs:
+
+  MyOwnDB:
+    Description: ID for the MyOwnDB
+    Value: !Ref MyOwnDB
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MyOwnDB", !Ref MyOwnPostfix ] ]

@@ -2,17 +2,27 @@ package com.me.сontroller;
 
 import com.me.domain.Image;
 import com.me.service.ImageService;
+import com.me.service.NotificationService;
+import com.me.service.enumType.EventEnum;
 import com.me.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.logging.Logger;
 
+import static com.me.util.Util.currentPublicIpAddress;
 import static java.util.Objects.isNull;
 
 @RestController
@@ -20,10 +30,15 @@ import static java.util.Objects.isNull;
 public class ImageController {
     private static Logger log = Logger.getLogger(ImageController.class.getName());
     private final ImageService imageService;
+    private final NotificationService notificationService;
+
+    @Value("${server.port}")
+    private String serverPort;
 
     @Autowired
-    public ImageController(ImageService imageService) {
+    public ImageController(ImageService imageService, NotificationService notificationService) {
         this.imageService = imageService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping(value = "/{fullName:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -49,6 +64,8 @@ public class ImageController {
             throw new NullPointerException("No image received!");
         }
         final Image uploadedImage = imageService.uploadImage(image);
+        final String resourceUrl = currentPublicIpAddress() + ":" + serverPort + "/images/" + uploadedImage.getFullName();
+        notificationService.publishUploadImageEvent(EventEnum.UPLOAD, uploadedImage, resourceUrl);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(uploadedImage.getFullName());
     }
