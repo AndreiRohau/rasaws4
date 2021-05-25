@@ -65,7 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
             final List<Subscription> subscriptions = snsClient.listSubscriptions(request).subscriptions();
             final Subscription subscription = subscriptions.stream()
                     .filter(s -> s.endpoint().equals(email)
-                            && s.subscriptionArn().equals(AWS_SNS_TOPIC_ARN.getValue()))
+                            && s.topicArn().equals(AWS_SNS_TOPIC_ARN.getValue()))
                     .findFirst()
                     .get();
             final UnsubscribeRequest unsubscribeRequest = UnsubscribeRequest.builder()
