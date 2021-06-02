@@ -1,0 +1,109 @@
+# --------------------------------------------------------------------------------------------------
+# CloudFormation Network Layer: VPC, Subnets + RouteTables, Internet
+# Author: Andrei Rohau
+#
+# Version      Date           Name                Info
+# 1.0          12-05-2021    Andrei Rohau       Initial Version
+#
+# --------------------------------------------------------------------------------------------------
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Security Groups"
+
+Metadata:
+ AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Network Configuration (My Ip 37.214.58.98/32)"
+        Parameters: 
+          - Environment
+          - PassedQueueName
+          - IsFifo
+          - VT
+          - MRP
+          - DS
+          - MMS
+          - RMWTS
+          - MyOwnPostfix
+
+Parameters:
+  Environment:
+    Type: String
+    Default: "DEV"
+
+  PassedQueueName:
+    Type: String
+    Default: "MyOwnQueue"
+
+#  IsFifo:
+#    Type: String
+#    Default: "false"
+
+  VT:
+    Type: Number
+    Default: 30
+
+  MRP:
+    Type: Number
+    Default: 345600
+
+  DS:
+    Type: Number
+    Default: 0
+
+  MMS:
+    Type: Number
+    Default: 262144
+
+  RMWTS:
+    Type: Number
+    Default: 5
+
+  AWSUSER:
+    Type: String
+    Default: "716858514256"
+
+  MyOwnPostfix:
+    Type: String
+    Default: 'v'
+
+Resources:        
+#====== Security Groups ======
+  MySourceQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Ref PassedQueueName
+#      FifoQueue: !Ref IsFifo # Bug should be true or undefined - can not be false.
+      VisibilityTimeout: !Ref VT
+      MessageRetentionPeriod: !Ref MRP # 4 days
+      DelaySeconds: !Ref DS
+      MaximumMessageSize: !Ref MMS # 256 KiB (from 1KiB)
+      ReceiveMessageWaitTimeSeconds: !Ref RMWTS
+      Tags:
+      - Key: Name
+        Value: !Join [ "-", [ !Ref Environment, "MySourceQueue", !Ref MyOwnPostfix ] ]
+
+  SampleSQSPolicy:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      Queues:
+        - !Ref MySourceQueue
+      PolicyDocument:
+        Statement:
+          - Action:
+              - "SQS:SendMessage"
+              - "SQS:ReceiveMessage"
+            Effect: "Allow"
+            Resource: !Ref MySourceQueue #"arn:aws:sqs:us-east-2:444455556666:queue2" #
+            Principal:
+              AWS:
+                - !Ref AWSUSER
+        
+#====== OUTPUTS ======
+Outputs:
+      
+  MyOwnSgPub:
+    Description: ID for the MySourceQueue
+    Value: !Ref MySourceQueue
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MySourceQueue", !Ref MyOwnPostfix ] ]

@@ -17,6 +17,8 @@ Metadata:
           default: "Network Configuration (My Ip 37.214.27.94/32)"
         Parameters: 
           - Environment
+          - MyOwnSubnet1
+          - MyOwnSubnet2
           - DBTitle
           - MyOwnSgDb
           - PublicAccessibility
@@ -32,53 +34,76 @@ Parameters:
     Type: String
     Default: "DEV"
 
+  MyOwnSubnet1:
+    Type: String
+    Default: "subnet-07e050bc0ae855d1c"
+
+  MyOwnSubnet2:
+    Type: String
+    Default: "subnet-0e7a66e7d6ca81744"
+
   DBTitle:
     Type: String
     Default: "m8rdsarv81"
 
   MyOwnSgDb:
     Type: String
-    Default: '' # My default security group 3306
+    Default: "sg-0f10b946e2f0d5293" # My default security group 3306
 
   PublicAccessibility:
-    Type: boolean
-    Default: false
+    Type: String
+    Default: "false"
 
   MyOwnPostfix:
     Type: String
-    Default: 'v'
+    Default: "v"
 
-  AvailabilityZone:
+  MyAvailabilityZone:
     Type: String
-    Default: 'us-east-1a'
+    Default: "us-east-1a"
 
 Resources:
 
-#====== RDS ======
-  MyOwnDB:
-    Type: AWS::RDS::DBInstance
+  #====== Db Subnet Group ======
+  MyOwnDbSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
     Properties:
-      Engine: mysql
-      EngineVersion: 8.0.20
+      DBSubnetGroupName: "MyOwnDbSubnetGroup"
+      DBSubnetGroupDescription: "My own DBSubnetGroup"
+      SubnetIds:
+#        - Fn::GetAtt: [ !Ref MyOwnSubnet1, "SubnetId" ]
+#        - Fn::GetAtt: [ !Ref MyOwnSubnet2, "SubnetId" ]
+        - !Ref MyOwnSubnet1
+        - !Ref MyOwnSubnet2
+      Tags:
+        - Key: "Name"
+          Value: !Join [ "-", [ !Ref Environment, "MyOwnDbSubnetGroup", !Ref MyOwnPostfix ] ]
+
+  #====== RDS ======
+  MyOwnDB:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      Engine: "mysql"
+      EngineVersion: "8.0.20"
       DBInstanceIdentifier: !Ref DBTitle
-      MasterUsername: admin
-      MasterUserPassword: qwer1234
-      DBInstanceClass: db.t2.micro
-      StorageType: gp2
-      AllocatedStorage: '5'
-      DBSecurityGroups:
+      MasterUsername: "admin"
+      MasterUserPassword: "qwer1234"
+      DBInstanceClass: "db.t2.micro"
+      StorageType: "gp2"
+      AllocatedStorage: "5"
+      DBSubnetGroupName: !Ref MyOwnDbSubnetGroup
+      VPCSecurityGroups:
       - Ref: MyOwnSgDb
-      AvailabilityZone: !Ref AvailabilityZone
+      AvailabilityZone: !Ref MyAvailabilityZone
       PubliclyAccessible: !Ref PublicAccessibility
       DBName: !Ref DBTitle
-      DBParameterGroupName: default.mysql8.0
-      OptionGroupName: default.mysql8.0
+      DBParameterGroupName: "default.mysql8.0"
+#      OptionGroupName: "default-mysql8-0"
       BackupRetentionPeriod: 0
       AutoMinorVersionUpgrade: true
-      DeletionPolicy: Snapshot
       Tags:
       - Key: "Name"
-        Value: !Join [ "-", [ !Ref Environment, "MyOwnEC2", !Ref MyOwnPostfix ] ]
+        Value: !Join [ "-", [ !Ref Environment, "MyOwnDB", !Ref MyOwnPostfix ] ]
 
 #====== OUTPUTS ======
 Outputs:

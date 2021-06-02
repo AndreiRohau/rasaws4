@@ -1,0 +1,54 @@
+# --------------------------------------------------------------------------------------------------
+# CloudFormation Network Layer: VPC, Subnets + RouteTables, Internet
+# Author: Andrei Rohau
+#
+# Version      Date           Name                Info
+# 1.0          12-05-2021    Andrei Rohau       Initial Version
+#
+# --------------------------------------------------------------------------------------------------
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Security Groups"
+
+Metadata:
+ AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      - 
+        Label: 
+          default: "Network Configuration (My Ip 37.214.58.98/32)"
+        Parameters: 
+          - Environment
+          - PassedVPC
+          - MyPassedSpecialIpAddress # 0.0.0.0/0
+          - MyOwnPostfix
+
+Parameters:
+  Environment:
+    Type: String
+    Default: "DEV"
+
+  PassedTopicName:
+    Type: String
+    Default: "MyOwnSnsTopic"
+
+  MyOwnPostfix:
+    Type: String
+    Default: 'v'
+
+Resources:        
+#====== SNS ======
+  MySNSTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: !Ref PassedTopicName
+      Tags:
+      - Key: Name
+        Value: !Join [ "-", [ !Ref Environment, "MySNSTopic", !Ref MyOwnPostfix ] ]
+        
+#====== OUTPUTS ======
+Outputs:
+      
+  MyOwnSgPub:
+    Description: ID for the MySNSTopic
+    Value: !Ref MySNSTopic
+    Export:
+      Name: !Join [ "-", [ !Ref Environment, "MySNSTopic", !Ref MyOwnPostfix ] ]

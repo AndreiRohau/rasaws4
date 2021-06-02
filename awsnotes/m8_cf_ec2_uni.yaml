@@ -82,7 +82,7 @@ Resources:
 
 #====== EC2 ======
   MyOwnEC2: 
-    Type: AWS::EC2::Instance
+    Type: "AWS::EC2::Instance"
     Properties: 
       IamInstanceProfile: !Ref MyOwnEC2IamInstanceProfile
       ImageId: !Ref MyOwnAmiId
