@@ -128,17 +128,19 @@ public class NotificationServiceImpl implements NotificationService {
     public void callLambdaToSendNotifications() {
         log.info("NotificationServiceImpl#callLambdaToSendNotifications()");
         try {
-            InvokeResponse res = null ;
+            InvokeResponse res;
             //Need a SdkBytes instance for the payload
             String json = "{\n" +
                     "  \"msg\": \"Lambda got the message =)\",\n" +
                     "  \"awsAccessKeyId\": \"" + AWS_ACCESS_KEY_ID.getValue() + "\",\n" +
                     "  \"awsSecretKey\": \"" + AWS_SECRET_KEY.getValue() + "\",\n" +
                     "  \"awsRegion\": \"" + REGION_PROP + "\",\n" +
-                    "  \"awsSnsTopicArn\": \"" + AWS_SNS_TOPIC_ARN + "\",\n" +
+                    "  \"awsSnsTopicArn\": \"" + AWS_SNS_TOPIC_ARN.getValue() + "\",\n" +
                     "  \"awsSqsUrl\": \"https://sqs.us-east-1.amazonaws.com/716858514256/MyOwnQueue\",\n" +
                     "  \"awsSqsQueueName\": \"" + AWS_SQS_QUEUE_NAME.getValue() + "\"\n" +
                     "}";
+
+            log.info("NotificationServiceImpl#callLambdaToSendNotifications(). Lambda payload=[" + json + "].");
             SdkBytes payload = SdkBytes.fromUtf8String(json) ;
 
             //Setup an InvokeRequest
@@ -149,12 +151,13 @@ public class NotificationServiceImpl implements NotificationService {
 
             //Invoke the Lambda function
             res = lambdaClient.invoke(request);
-            String value = res.payload().asUtf8String() ;
+            String value = res.payload().asUtf8String();
             log.info("NotificationServiceImpl#callLambdaToSendNotifications(). Lambda results=[" + value + "].");
 
         } catch(LambdaException e) {
             log.warning("NotificationServiceImpl#callLambdaToSendNotifications() thrown an error.");
-            log.warning(e.getMessage());
+//            log.warning(e.getMessage());
+            e.printStackTrace();
         }
     }
 
