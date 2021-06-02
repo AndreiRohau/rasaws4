@@ -1,5 +1,6 @@
 package com.me.aws;
 
+import com.me.aws.provider.AwsLambdaProvider;
 import com.me.aws.provider.AwsS3Provider;
 import com.me.aws.provider.AwsSnsProvider;
 import com.me.aws.provider.AwsSqsProvider;
@@ -22,12 +23,14 @@ public class AwsClientFactory {
     private AwsS3Provider awsS3Provider;
     private AwsSnsProvider awsSnsProvider;
     private AwsSqsProvider awsSqsProvider;
+    private AwsLambdaProvider awsLambdaProvider;
 
     @Autowired
-    public AwsClientFactory(AwsS3Provider awsS3Provider, AwsSnsProvider awsSnsProvider, AwsSqsProvider awsSqsProvider) {
+    public AwsClientFactory(AwsS3Provider awsS3Provider, AwsSnsProvider awsSnsProvider, AwsSqsProvider awsSqsProvider, AwsLambdaProvider awsLambdaProvider) {
         this.awsS3Provider = awsS3Provider;
         this.awsSnsProvider = awsSnsProvider;
         this.awsSqsProvider = awsSqsProvider;
+        this.awsLambdaProvider = awsLambdaProvider;
     }
 
     @PostConstruct
@@ -35,6 +38,7 @@ public class AwsClientFactory {
         clients.put(S3, awsS3Provider.getS3client());
         clients.put(SNS, awsSnsProvider.getSnsClient());
         clients.put(SQS, awsSqsProvider.getSqsClient());
+        clients.put(LAMBDA, awsLambdaProvider.getLambdaClient());
     }
 
     @PreDestroy

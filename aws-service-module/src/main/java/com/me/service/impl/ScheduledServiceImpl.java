@@ -32,4 +32,11 @@ public class ScheduledServiceImpl implements ScheduledService {
             notificationService.sendNotifications();
         };
     }
+
+    public Runnable prepareLambdaNotificationTask() {
+        return () -> {
+            log.info("Starting LAMBDA getting notifications...");
+            notificationService.callLambdaToSendNotifications();
+        };
+    }
 }

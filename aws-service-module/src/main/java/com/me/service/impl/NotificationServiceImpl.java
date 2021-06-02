@@ -6,7 +6,13 @@ import com.me.service.NotificationService;
 import com.me.service.dto.SqsMessageDto;
 import com.me.service.enumType.EventEnum;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.InvokeRequest;
+import software.amazon.awssdk.services.lambda.model.InvokeResponse;
+import software.amazon.awssdk.services.lambda.model.LambdaException;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.*;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -15,10 +21,8 @@ import software.amazon.awssdk.services.sqs.model.*;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static com.me.aws.AwsClientNameEnum.SNS;
-import static com.me.aws.AwsClientNameEnum.SQS;
-import static com.me.aws.CredentialsStateHolder.AWS_SNS_TOPIC_ARN;
-import static com.me.aws.CredentialsStateHolder.AWS_SQS_QUEUE_NAME;
+import static com.me.aws.AwsClientNameEnum.*;
+import static com.me.aws.CredentialsStateHolder.*;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -27,11 +31,16 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final SnsClient snsClient;
     private final SqsClient sqsClient;
+    private final LambdaClient lambdaClient;
+
+    @Value("${aws.region}")
+    protected String REGION_PROP;
 
     @Autowired
     public NotificationServiceImpl(AwsClientFactory awsClientFactory) {
         this.snsClient = (SnsClient) awsClientFactory.getClients().get(SNS);
         this.sqsClient = (SqsClient) awsClientFactory.getClients().get(SQS);
+        this.lambdaClient = (LambdaClient) awsClientFactory.getClients().get(LAMBDA);
     }
 
     // subscribe to SNS (arn passed as an arg) and send message that the user is subscribed
@@ -113,6 +122,40 @@ public class NotificationServiceImpl implements NotificationService {
         final List<String> messageTexts = sqsMessages.stream().map(Message::body).collect(toList());
         publishSnsTopic(messageTexts);
         deleteProcessedSqsMessages(sqsMessages, sqsUrl);
+    }
+
+    @Override
+    public void callLambdaToSendNotifications() {
+        log.info("NotificationServiceImpl#callLambdaToSendNotifications()");
+        try {
+            InvokeResponse res = null ;
+            //Need a SdkBytes instance for the payload
+            String json = "{\n" +
+                    "  \"msg\": \"Lambda got the message =)\",\n" +
+                    "  \"awsAccessKeyId\": \"" + AWS_ACCESS_KEY_ID.getValue() + "\",\n" +
+                    "  \"awsSecretKey\": \"" + AWS_SECRET_KEY.getValue() + "\",\n" +
+                    "  \"awsRegion\": \"" + REGION_PROP + "\",\n" +
+                    "  \"awsSnsTopicArn\": \"" + AWS_SNS_TOPIC_ARN + "\",\n" +
+                    "  \"awsSqsUrl\": \"https://sqs.us-east-1.amazonaws.com/716858514256/MyOwnQueue\",\n" +
+                    "  \"awsSqsQueueName\": \"" + AWS_SQS_QUEUE_NAME.getValue() + "\"\n" +
+                    "}";
+            SdkBytes payload = SdkBytes.fromUtf8String(json) ;
+
+            //Setup an InvokeRequest
+            InvokeRequest request = InvokeRequest.builder()
+                    .functionName(AWS_LAMBDA_FUNCTION_NAME.getValue())
+                    .payload(payload)
+                    .build();
+
+            //Invoke the Lambda function
+            res = lambdaClient.invoke(request);
+            String value = res.payload().asUtf8String() ;
+            log.info("NotificationServiceImpl#callLambdaToSendNotifications(). Lambda results=[" + value + "].");
+
+        } catch(LambdaException e) {
+            log.warning("NotificationServiceImpl#callLambdaToSendNotifications() thrown an error.");
+            log.warning(e.getMessage());
+        }
     }
 
     private String getSqsUrl() {
