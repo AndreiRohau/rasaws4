@@ -43,7 +43,9 @@ public class FrontController {
                         "Click to schedule notifications:<br/>" +
                         "<a href=\"/run-scheduled-notification\">/Begin scheduled notifications</a><br/><br/>" +
                         "Click to publish notifications:<br/>" +
-                        "<a href=\"/run-publish-notification\">/Publish notifications</a><br/><br/>");
+                        "<a href=\"/run-publish-notification\">/Publish notifications</a><br/><br/>" +
+                        "Click to publish notifications:<br/>" +
+                        "<a href=\"/run-lambda-publish-notification\">/Call lambda to publish notifications</a><br/><br/>");
     }
 
     @GetMapping("/run-scheduled-notification")
@@ -64,6 +66,17 @@ public class FrontController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Notifications published!<br/><br/> " +
+                        "Click to go back home:<br/>" +
+                        "<a href=\"/\">/Back home</a><br/><br/>");
+    }
+
+    @GetMapping("/run-lambda-publish-notification")
+    public ResponseEntity<String> runLambdaPublishNotification() {
+        log.info("FrontController#runLambdaPublishNotification()");
+        scheduledService.prepareLambdaNotificationTask().run();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Call lambda to run notifications!<br/><br/> " +
                         "Click to go back home:<br/>" +
                         "<a href=\"/\">/Back home</a><br/><br/>");
     }

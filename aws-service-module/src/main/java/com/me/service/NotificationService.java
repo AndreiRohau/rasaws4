@@ -8,4 +8,5 @@ public interface NotificationService {
     void unsubscribeEmail(String userId, String email);
     void publishUploadImageEvent(EventEnum eventEnum, Image image, String resourceUrl);
     void sendNotifications();
+    void callLambdaToSendNotifications();
 }
