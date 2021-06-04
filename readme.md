@@ -4,3 +4,6 @@ https://youtu.be/Y-rvq21mq7w
 2) change database endpoint to application.properties
 3) if local run: check your IP is inbound ec2:SecurityGroupDb
 4) if local run: check RDS has public accessibility
+
+https://github.com/AndreiRohau/awsLambdaWithJava
+...check my youtube videos if got questions
