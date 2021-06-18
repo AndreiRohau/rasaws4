@@ -30,5 +30,5 @@ runcmd:
  - sudo chown  ec2-user my-java-app
  - sudo chmod -R o+r my-java-app
  - cd /home/ec2-user/my-java-app
- - curl -L -O https://github.com/AndreiRohau/rasaws4/raw/master/awsjar/aws-web-module-1.0-SNAPSHOT.jar
+ - curl -L -O https://awslambdasqstosnscodecommitjar.s3.amazonaws.com/aws-web-module/target/aws-web-module-1.0-SNAPSHOT.jar
  - java -jar aws-web-module-1.0-SNAPSHOT.jar _accessKeyId_ _secretKey_ _snsTopicArn_ _sqsQueueName_ _lambdaName_
